@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr
@@ -18,10 +18,10 @@ import soundfile as sf
 # ------------------- FastAPI App -------------------
 app = FastAPI()
 
-# Enable CORS
+# Enable CORS (edit allow_origins for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to specific domain in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,7 +54,6 @@ def hash_password(password: str) -> str:
 @app.get("/")
 def read_root():
     return {"message": "Vocal Extractor API is running!"}
-
 
 # ------------------- Auth Routes -------------------
 @app.post("/register")
@@ -112,11 +111,15 @@ def google_login(req: GoogleLoginRequest):
 async def process_video(file: UploadFile = File(...), format: str = Form(...)):
     video_id = str(uuid.uuid4())
     os.makedirs("temp", exist_ok=True)
+    os.makedirs("separated_output", exist_ok=True)
     video_path = f"temp/{video_id}_{file.filename}"
 
+    # Save uploaded video
     with open(video_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    file.file.close()
 
+    # Extract audio
     temp_audio_path = f"temp/{video_id}_temp.wav"
     ffmpeg_cmd = [
         "ffmpeg", "-y", "-i", video_path,
@@ -128,15 +131,16 @@ async def process_video(file: UploadFile = File(...), format: str = Form(...)):
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg stderr: {e.stderr}")
-        raise HTTPException(status_code=500, detail=f"ffmpeg failed: {str(e)}")
+        os.remove(video_path)
+        raise HTTPException(status_code=500, detail="ffmpeg failed to extract audio.")
 
+    # Demucs model
     model = get_model(name='htdemucs')
     model.eval()
 
     wave, sr = torchaudio.load(temp_audio_path)
     if sr != 44100:
         wave = torchaudio.transforms.Resample(orig_freq=sr, new_freq=44100)(wave)
-
     if wave.shape[0] == 1:
         wave = wave.repeat(2, 1)
 
@@ -150,10 +154,10 @@ async def process_video(file: UploadFile = File(...), format: str = Form(...)):
     os.makedirs(output_dir, exist_ok=True)
     vocals_wav = os.path.join(output_dir, "vocals.wav")
     music_wav = os.path.join(output_dir, "music.wav")
-
     sf.write(vocals_wav, vocals, 44100)
     sf.write(music_wav, music, 44100)
 
+    # Prepare output (choose format)
     if format == "mp4":
         vocals_mp4 = os.path.join(output_dir, "vocals.mp4")
         music_mp4 = os.path.join(output_dir, "music.mp4")
@@ -161,16 +165,24 @@ async def process_video(file: UploadFile = File(...), format: str = Form(...)):
         subprocess.run(["ffmpeg", "-y", "-i", vocals_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", vocals_mp4], check=True)
         subprocess.run(["ffmpeg", "-y", "-i", music_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", music_mp4], check=True)
         
-        os.remove(video_path)
-        os.remove(temp_audio_path)
+        # Clean up temporary files
+        try:
+            os.remove(video_path)
+            os.remove(temp_audio_path)
+        except Exception:
+            pass
 
         return {
             "vocals_url": f"/download?file={vocals_mp4}",
             "music_url": f"/download?file={music_mp4}"
         }
     else:
-        os.remove(video_path)
-        os.remove(temp_audio_path)
+        # Clean up temporary files
+        try:
+            os.remove(video_path)
+            os.remove(temp_audio_path)
+        except Exception:
+            pass
 
         return {
             "vocals_url": f"/download?file={vocals_wav}",
@@ -178,16 +190,17 @@ async def process_video(file: UploadFile = File(...), format: str = Form(...)):
         }
 
 @app.get("/download")
-def download(file: str):
-    if not os.path.exists(file) or not file.startswith("separated_output"):
+def download(file: str = Query(...)):
+    # Security: Ensure no path traversal and only serve from allowed directory
+    if not file.startswith("separated_output/"):
+        raise HTTPException(status_code=404, detail="Invalid file path")
+    if not os.path.isfile(file):
         raise HTTPException(status_code=404, detail="File not found")
         
     return FileResponse(file, media_type="application/octet-stream", filename=os.path.basename(file))
-
 
 # ------------------- Entry Point for Deployment -------------------
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))  # use $PORT from environment if available
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
-
