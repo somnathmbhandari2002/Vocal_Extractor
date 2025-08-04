@@ -1,3 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+demucs
+torchaudio
+torch
+ffmpeg-python
+requests
+soundfile
 annotated-types==0.7.0
 antlr4-python3-runtime==4.9.3
 anyio==4.9.0
@@ -54,3 +64,4 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 urllib3==2.5.0
 uvicorn==0.35.0
+
