@@ -1,8 +1,8 @@
-#
-# Corrected FastAPI application for Vocal Extractor.
-# This code fixes the SyntaxError caused by non-printable characters
-# and includes updated ffmpeg commands for correct video/audio muxing.
-#
+# main.py
+# This is the corrected FastAPI application for a Vocal Extractor.
+# It addresses the SyntaxError from non-printable characters and
+# optimizes performance for deployment by loading the ML model once.
+
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -19,6 +19,10 @@ import torch
 from demucs.pretrained import get_model
 from demucs.apply import apply_model
 import soundfile as sf
+from concurrent.futures import ThreadPoolExecutor
+
+# Initialize a thread pool for CPU-bound tasks
+executor = ThreadPoolExecutor(max_workers=4)
 
 # ------------------- FastAPI App -------------------
 app = FastAPI()
@@ -53,7 +57,23 @@ class GoogleLoginRequest(BaseModel):
 
 # ------------------- Helpers -------------------
 def hash_password(password: str) -> str:
+    """Hashes a password using SHA-256."""
     return hashlib.sha256(password.encode()).hexdigest()
+
+# ------------------- Global Model Loading -------------------
+# This is a critical optimization for performance and memory.
+# The Demucs model is loaded only once when the application starts.
+# Loading it inside the route would cause it to re-download and
+# re-load for every single request, which would be very slow and
+# would likely exceed memory limits on a free tier.
+try:
+    print("Loading Demucs model...")
+    demucs_model = get_model(name='htdemucs')
+    demucs_model.eval()
+    print("Demucs model loaded successfully.")
+except Exception as e:
+    print(f"Error loading Demucs model: {e}")
+    demucs_model = None
 
 # ------------------- Initial -------------------
 @app.get("/")
@@ -112,88 +132,91 @@ def google_login(req: GoogleLoginRequest):
         raise HTTPException(status_code=500, detail=f"Google login failed: {str(e)}")
 
 # ------------------- Video Processing Route -------------------
+def process_video_sync(video_path: str, video_id: str, format: str):
+    """
+    Synchronous function for video processing.
+    Runs in a thread pool to avoid blocking the main event loop.
+    """
+    if demucs_model is None:
+        raise RuntimeError("Demucs model is not loaded.")
+
+    temp_audio_path = f"temp/{video_id}_temp.wav"
+    ffmpeg_cmd_extract = [
+        "ffmpeg", "-y", "-i", video_path,
+        "-ar", "44100", "-ac", "2", "-vn",
+        "-loglevel", "error", temp_audio_path
+    ]
+
+    subprocess.run(ffmpeg_cmd_extract, check=True, capture_output=True, text=True)
+
+    wave, sr = torchaudio.load(temp_audio_path)
+    if sr != 44100:
+        wave = torchaudio.transforms.Resample(orig_freq=sr, new_freq=44100)(wave)
+    if wave.shape[0] == 1:
+        wave = wave.repeat(2, 1)
+
+    with torch.no_grad():
+        sources = apply_model(demucs_model, wave.unsqueeze(0))
+
+    vocals = sources[0, 3].cpu().T.numpy()
+    music = (sources[0, 0] + sources[0, 1] + sources[0, 2]).cpu().T.numpy()
+
+    output_dir = f"separated_output/{video_id}"
+    os.makedirs(output_dir, exist_ok=True)
+    vocals_wav = os.path.join(output_dir, "vocals.wav")
+    music_wav = os.path.join(output_dir, "music.wav")
+    sf.write(vocals_wav, vocals, 44100)
+    sf.write(music_wav, music, 44100)
+
+    # Prepare output (choose format)
+    if format == "mp4":
+        vocals_mp4 = os.path.join(output_dir, "vocals.mp4")
+        music_mp4 = os.path.join(output_dir, "music.mp4")
+
+        # Correct ffmpeg command with -map for proper stream handling
+        subprocess.run(["ffmpeg", "-y", "-i", vocals_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", "-map", "0:a", "-map", "1:v", vocals_mp4], check=True, capture_output=True)
+        subprocess.run(["ffmpeg", "-y", "-i", music_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", "-map", "0:a", "-map", "1:v", music_mp4], check=True, capture_output=True)
+        
+        return {
+            "vocals_url": f"/download?file={vocals_mp4}",
+            "music_url": f"/download?file={music_mp4}"
+        }
+    else:
+        return {
+            "vocals_url": f"/download?file={vocals_wav}",
+            "music_url": f"/download?file={music_wav}"
+        }
+
 @app.post("/process")
 async def process_video(file: UploadFile = File(...), format: str = Form(...)):
+    if demucs_model is None:
+        raise HTTPException(status_code=503, detail="Service unavailable: Demucs model failed to load at startup.")
+
     video_id = str(uuid.uuid4())
     os.makedirs("temp", exist_ok=True)
     os.makedirs("separated_output", exist_ok=True)
     video_path = f"temp/{video_id}_{file.filename}"
 
-    # Save uploaded video
     try:
         with open(video_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not save uploaded file: {str(e)}")
 
-    # Extract audio
-    temp_audio_path = f"temp/{video_id}_temp.wav"
-    ffmpeg_cmd = [
-        "ffmpeg", "-y", "-i", video_path,
-        "-ar", "44100", "-ac", "2", "-vn",
-        "-loglevel", "error", temp_audio_path
-    ]
-
     try:
-        subprocess.run(ffmpeg_cmd, check=True, capture_output=True, text=True)
+        # Use run_in_threadpool for the CPU-bound task
+        response = await app.loop.run_in_executor(executor, process_video_sync, video_path, video_id, format)
+        return response
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg stderr: {e.stderr}")
-        os.remove(video_path)
-        raise HTTPException(status_code=500, detail="ffmpeg failed to extract audio.")
-
-    try:
-        # Demucs model
-        model = get_model(name='htdemucs')
-        model.eval()
-    
-        wave, sr = torchaudio.load(temp_audio_path)
-        if sr != 44100:
-            wave = torchaudio.transforms.Resample(orig_freq=sr, new_freq=44100)(wave)
-        if wave.shape[0] == 1:
-            wave = wave.repeat(2, 1)
-
-        with torch.no_grad():
-            sources = apply_model(model, wave.unsqueeze(0))
-
-        vocals = sources[0, 3].cpu().T.numpy()
-        music = (sources[0, 0] + sources[0, 1] + sources[0, 2]).cpu().T.numpy()
-
-        output_dir = f"separated_output/{video_id}"
-        os.makedirs(output_dir, exist_ok=True)
-        vocals_wav = os.path.join(output_dir, "vocals.wav")
-        music_wav = os.path.join(output_dir, "music.wav")
-        sf.write(vocals_wav, vocals, 44100)
-        sf.write(music_wav, music, 44100)
-
-        # Prepare output (choose format)
-        if format == "mp4":
-            vocals_mp4 = os.path.join(output_dir, "vocals.mp4")
-            music_mp4 = os.path.join(output_dir, "music.mp4")
-            
-            # Correct ffmpeg command with -map for proper stream handling
-            subprocess.run(["ffmpeg", "-y", "-i", vocals_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", "-map", "0:a", "-map", "1:v", vocals_mp4], check=True, capture_output=True)
-            subprocess.run(["ffmpeg", "-y", "-i", music_wav, "-i", video_path, "-c:v", "copy", "-c:a", "aac", "-map", "0:a", "-map", "1:v", music_mp4], check=True, capture_output=True)
-            
-            return {
-                "vocals_url": f"/download?file={vocals_mp4}",
-                "music_url": f"/download?file={music_mp4}"
-            }
-        else:
-            return {
-                "vocals_url": f"/download?file={vocals_wav}",
-                "music_url": f"/download?file={music_wav}"
-            }
-    
-    except subprocess.CalledProcessError as e:
-        print(f"FFmpeg muxing stderr: {e.stderr}")
-        raise HTTPException(status_code=500, detail=f"FFmpeg failed to create final video: {e.stderr}")
+        raise HTTPException(status_code=500, detail=f"FFmpeg failed: {e.stderr}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred during audio processing: {str(e)}")
     finally:
         # Clean up temporary files regardless of success or failure
         try:
             os.remove(video_path)
-            os.remove(temp_audio_path)
+            os.remove(f"temp/{video_id}_temp.wav")
         except Exception:
             pass
 
@@ -206,9 +229,3 @@ def download(file: str = Query(...)):
         raise HTTPException(status_code=404, detail="File not found")
         
     return FileResponse(file, media_type="application/octet-stream", filename=os.path.basename(file))
-
-# ------------------- Entry Point for Deployment -------------------
-# if __name__ == "__main__":
-#     import uvicorn
-#     port = int(os.environ.get("PORT", 8000)) # use $PORT from environment if available
-#     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
