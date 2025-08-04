@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login/Signup/Forgot Password</title>
+    <link rel="stylesheet" href="style_1.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="form-box login">
+            <form id="login-form">
+                <h1>Login</h1>
+                <div class="input-box">
+                    <input type="text" placeholder="Username" id="login-username" required />
+                    <i class="bx bxs-user"></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" placeholder="Password" id="login-password" required />
+                    <i class="bx bxs-lock-alt"></i>
+                </div>
+                <div class="forgot-link">
+                    <a href="#" id="forgot-password-link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn login-submit-btn">Login</button>
+                <p>or login with social platforms</p>
+                <div class="social-icons">
+                    <div id="g_id_onload"
+                        data-client_id="639870103559-p7mrkk5m47n9jd2jkfhu38lk3jnve4cc.apps.googleusercontent.com"
+                        data-callback="onSignIn"
+                        data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                        data-type="icon"
+                        data-size="large"
+                        data-theme="outline"
+                        data-text="sign_in_with"
+                        data-shape="circle"
+                        data-logo_alignment="left">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="form-box register">
+            <form id="register-form">
+                <h1>Registration</h1>
+                <div class="input-box">
+                    <input type="text" placeholder="Username" id="register-username" required />
+                    <i class="bx bxs-user"></i>
+                </div>
+                <div class="input-box">
+                    <input type="email" placeholder="Email" id="register-email" required />
+                    <i class="bx bxs-envelope"></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" placeholder="Password" id="register-password" required />
+                    <i class="bx bxs-lock-alt"></i>
+                </div>
+                <button type="submit" class="btn register-submit-btn">Register</button>
+                <p>or register with social platforms</p>
+                <div class="social-icons">
+                    <div class="g_id_signin"
+                        data-type="icon"
+                        data-size="large"
+                        data-theme="outline"
+                        data-text="sign_in_with"
+                        data-shape="circle"
+                        data-logo_alignment="left">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="form-box forgot-password">
+            <form id="forgot-password-form">
+                <h1>Forgot Password</h1>
+                <p>Enter your email to reset your password.</p>
+                <div class="input-box">
+                    <input type="email" placeholder="Email" id="forgot-email" required />
+                    <i class="bx bxs-envelope"></i>
+                </div>
+                <button type="submit" class="btn forgot-password-submit-btn">Reset Password</button>
+            </form>
+        </div>
+
+        <div class="toggle-box">
+            <div class="toggle-panel toggle-left">
+                <h1>Hello, Welcome!</h1>
+                <p>Don't have an account?</p>
+                <button class="btn register-btn">Register</button>
+            </div>
+
+            <div class="toggle-panel toggle-right">
+                <h1>Welcome Back!</h1>
+                <p>Already have an account?</p>
+                <button class="btn login-btn">Login</button>
+            </div>
+            
+            <div class="toggle-panel toggle-forgot-password">
+                <h1>Having Trouble?</h1>
+                <p>No worries, we can help you out!</p>
+                <button class="btn back-to-login-btn-from-panel">Back to Login</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script>
+        const GOOGLE_CLIENT_ID = "639870103559-p7mrkk5m47n9jd2jkfhu38lk3jnve4cc.apps.googleusercontent.com";
+        const BACKEND_URL = "http://localhost:8000";
+        const MAIN_APP_PAGE_PATH = "frontend.html"; 
+        const SESSION_STORAGE_KEY = "isLoggedIn";
+
+        const container = document.querySelector('.container');
+        const registerBtn = document.querySelector('.register-btn');
+        const loginBtn = document.querySelector('.login-btn');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const backToLoginBtnFromPanel = document.querySelector('.back-to-login-btn-from-panel');
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        
+        // --- UI Functions ---
+        function showLoginForm() {
+            container.classList.remove('active', 'show-forgot-password');
+        }
+
+        function showRegisterForm() {
+            container.classList.add('active');
+            container.classList.remove('show-forgot-password');
+        }
+
+        function showForgotPasswordForm() {
+            container.classList.add('show-forgot-password');
+            container.classList.remove('active');
+        }
+
+        function redirectToMainApp() {
+            sessionStorage.setItem(SESSION_STORAGE_KEY, "true");
+            window.location.href = MAIN_APP_PAGE_PATH;
+        }
+
+        // --- Event Listeners for UI toggles ---
+        registerBtn.addEventListener('click', showRegisterForm);
+        loginBtn.addEventListener('click', showLoginForm);
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showForgotPasswordForm();
+        });
+        backToLoginBtnFromPanel.addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginForm();
+        });
+
+        // --- Google Sign-In Callback function ---
+        function onSignIn(response) {
+            console.log("Google Sign-In successful. Sending token to backend...");
+            const id_token = response.credential;
+            
+            fetch(`${BACKEND_URL}/google-login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: id_token })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Unknown error from backend"); });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.message === "Google login successful") {
+                    alert("Google Login successful! Welcome " + data.username);
+                    redirectToMainApp();
+                } else {
+                    alert("Google Login failed: " + (data.detail || "An unexpected error occurred."));
+                }
+            })
+            .catch(error => {
+                alert("An error occurred during Google login: " + error.message);
+                console.error("Error during Google login:", error);
+            });
+        }
+
+        // --- Form Submission Handlers ---
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            fetch(`${BACKEND_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Invalid credentials."); });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.message === "Login successful") {
+                    alert("Login successful! Redirecting to the main application.");
+                    redirectToMainApp();
+                }
+            })
+            .catch(error => {
+                alert("Login failed: " + error.message);
+                console.error("Error:", error);
+            });
+        });
+
+        // Register Form Submission
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            fetch(`${BACKEND_URL}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "An error occurred during registration."); });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.message === "Registration successful") {
+                    alert("Registration successful! Please log in.");
+                    showLoginForm();
+                }
+            })
+            .catch(error => {
+                alert("Registration failed: " + error.message);
+                console.error("Error:", error);
+            });
+        });
+
+        // Forgot Password Form Submission
+        forgotPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+
+            fetch(`${BACKEND_URL}/forgot-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                showLoginForm();
+            })
+            .catch(error => {
+                alert("An error occurred during the password reset request.");
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>

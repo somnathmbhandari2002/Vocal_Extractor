@@ -1,0 +1,545 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+    list-style: none;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+}
+
+.container {
+    position: relative;
+    width: 850px;
+    height: 550px;
+    background: #fff;
+    margin: 20px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.container h1 {
+    font-size: 36px;
+    margin: -10px 0;
+}
+
+.container p {
+    font-size: 14.5px;
+    margin: 15px 0;
+}
+
+form {
+    width: 100%;
+}
+
+/* Base Form Box Styles */
+.form-box {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    text-align: center;
+    padding: 40px;
+    z-index: 1;
+    /* Transition for sliding left/right */
+    transition: transform 0.6s ease-in-out, visibility 0s 1s;
+}
+
+/* Initial positions */
+.form-box.login {
+    left: 0; /* Login is on the left initially */
+    transform: translateX(0);
+}
+
+.form-box.register {
+    left: 100%; /* Register is off-screen to the right initially */
+    transform: translateX(0);
+    visibility: hidden; /* Hide register by default */
+}
+
+.form-box.forgot-password { /* New: Forgot Password starts off-screen right */
+    left: 100%;
+    transform: translateX(0);
+    visibility: hidden;
+}
+
+
+/* When container has 'active' class (showing register) */
+.container.active .form-box.login {
+    transform: translateX(-100%); /* Slide login off-screen left */
+    visibility: hidden;
+    transition: transform 0.6s ease-in-out, visibility 0s 0.6s;
+}
+
+.container.active .form-box.register {
+    transform: translateX(-100%); /* Slide register into view */
+    visibility: visible;
+    transition: transform 0.6s ease-in-out 0.6s, visibility 0s 0.6s; /* Delay for incoming */
+}
+
+/* When container has 'show-forgot-password' class */
+.container.show-forgot-password .form-box.login {
+    transform: translateX(-100%); /* Slide login off-screen left */
+    visibility: hidden;
+    transition: transform 0.6s ease-in-out, visibility 0s 0.6s;
+}
+
+.container.show-forgot-password .form-box.forgot-password {
+    transform: translateX(-100%); /* Slide forgot password into view */
+    visibility: visible;
+    transition: transform 0.6s ease-in-out 0.6s, visibility 0s 0.6s;
+}
+
+/* Ensure register form is hidden when forgot password is active */
+.container.show-forgot-password .form-box.register {
+    visibility: hidden;
+    transition: visibility 0s 0.6s; /* Hide immediately */
+}
+
+/* Ensure forgot password form is hidden when active (register) is set */
+.container.active .form-box.forgot-password {
+    visibility: hidden;
+    transition: visibility 0s 0.6s;
+}
+
+
+.input-box {
+    position: relative;
+    margin: 30px 0;
+    width: 100%;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 13px 50px 13px 20px;
+    background: #eee;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.input-box input::placeholder {
+    color: #888;
+    font-weight: 400;
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.forgot-link { /* Now this only handles the link in the login form */
+    margin: -15px 0 15px;
+    width: 100%;
+    text-align: right;
+}
+.forgot-link a {
+    font-size: 14.5px;
+    color: #333;
+    transition: color 0.3s;
+}
+.forgot-link a:hover {
+    color: #7494ec;
+}
+
+.btn {
+    width: 100%;
+    height: 48px;
+    background: #7494ec;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+    background: #5d7fe2;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.social-icons a {
+    display: inline-flex;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
+    color: #333;
+    margin: 0 8px;
+    transition: border-color 0.3s, color 0.3s;
+}
+
+.social-icons a:hover {
+    border-color: #7494ec;
+    color: #7494ec;
+}
+
+/* Toggle Box and Panels */
+.toggle-box {
+    position: absolute;
+    top: 0;
+    left: 50%; /* Starts at the right half of the container */
+    width: 50%;
+    height: 100%;
+    overflow: hidden; /* Hide overflow from before pseudo-element */
+    z-index: 3; /* Above form-boxes */
+    transition: transform 0.6s ease-in-out;
+}
+
+.toggle-box::before {
+    content: "";
+    position: absolute;
+    left: -100%; /* Cover the initial 50% width */
+    top: 0;
+    width: 200%; /* Double the toggle-box width */
+    height: 100%;
+    background: #7494ec;
+    border-radius: 0 30px 30px 0; /* Rounded right corners only */
+    z-index: 2; /* Below toggle-panels */
+    transform: translateX(0);
+    transition: transform 1.2s ease-in-out; /* Slower transition for the background slide */
+}
+
+/* When container is active (showing register) */
+.container.active .toggle-box {
+    transform: translateX(-100%); /* Slide toggle-box to the left */
+}
+.container.active .toggle-box::before {
+    transform: translateX(50%); /* Slide background to the right within its 200% width */
+    border-radius: 30px 0 0 30px; /* Rounded left corners */
+}
+
+/* When container is in forgot password mode */
+.container.show-forgot-password .toggle-box {
+    transform: translateX(-100%); /* Same as active for movement */
+}
+.container.show-forgot-password .toggle-box::before {
+    transform: translateX(50%); /* Same background movement */
+    border-radius: 30px 0 0 30px; /* Same border radius */
+}
+
+
+.toggle-panel {
+    position: absolute;
+    width: 100%; /* Takes full width of toggle-box */
+    height: 100%;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 3; /* Above ::before */
+    text-align: center;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.6s ease-in-out;
+}
+
+/* Initial panel positions and visibility (Login panel is visible) */
+.toggle-panel.toggle-left {
+    left: 0;
+    opacity: 1; /* Visible by default */
+    transition-delay: 0.6s; /* Delayed hide */
+}
+.toggle-panel.toggle-right {
+    left: 100%; /* Off-screen right */
+    opacity: 0;
+    transition-delay: 0s; /* Immediate show */
+}
+.toggle-panel.toggle-forgot-password { /* New: starts off-screen right */
+    left: 100%;
+    opacity: 0;
+    transition-delay: 0s;
+}
+
+
+/* When container has 'active' class (showing register) */
+.container.active .toggle-panel.toggle-left {
+    opacity: 0;
+    transition-delay: 0s; /* Hide immediately */
+}
+.container.active .toggle-panel.toggle-right {
+    left: 0; /* Move into view */
+    opacity: 1;
+    transition-delay: 0.6s; /* Delayed show */
+}
+/* Ensure forgot password panel is hidden when active */
+.container.active .toggle-panel.toggle-forgot-password {
+    opacity: 0;
+    left: 100%; /* Ensure it's off-screen */
+    transition-delay: 0s;
+}
+
+
+/* When container has 'show-forgot-password' class */
+.container.show-forgot-password .toggle-panel.toggle-left {
+    opacity: 0;
+    transition-delay: 0s;
+}
+.container.show-forgot-password .toggle-panel.toggle-right {
+    opacity: 0;
+    left: 100%; /* Ensure it's off-screen even if active was true */
+    transition-delay: 0s;
+}
+.container.show-forgot-password .toggle-panel.toggle-forgot-password {
+    left: 0; /* Move into view */
+    opacity: 1;
+    transition-delay: 0.6s;
+}
+
+
+.toggle-panel p {
+    margin-bottom: 20px;
+}
+
+.toggle-panel .btn {
+    width: 160px;
+    height: 46px;
+    background: transparent;
+    border: 2px solid #fff;
+    box-shadow: none;
+    transition: background 0.3s, color 0.3s;
+}
+
+.toggle-panel .btn:hover {
+    background: #fff;
+    color: #7494ec;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 650px) {
+    .container {
+        height: calc(100vh - 40px);
+        width: calc(100vw - 40px);
+        flex-direction: column; /* Stack forms vertically */
+    }
+
+    .form-box {
+        position: absolute; /* Revert to absolute for overlay effect */
+        width: 100%;
+        height: 100%; /* Take full height */
+        top: 0;
+        left: 0;
+        transform: none; /* Reset transforms */
+        opacity: 0; /* Hide by default and control with classes */
+        visibility: visible; /* All forms are visible initially */
+        transition: opacity 0.6s ease-in-out;
+        z-index: 1; /* Default lower z-index for forms */
+    }
+
+    /* Initial state (login form visible) */
+    .form-box.login {
+        opacity: 1;
+        z-index: 2; /* Active form is on top */
+    }
+
+    /* When active (showing register form) */
+    .container.active .form-box.login {
+        opacity: 0;
+        z-index: 1;
+        transition-delay: 0s;
+    }
+    .container.active .form-box.register {
+        opacity: 1;
+        z-index: 2;
+        transition-delay: 0.6s;
+    }
+
+    /* When show-forgot-password (showing forgot password form) */
+    .container.show-forgot-password .form-box.login {
+        opacity: 0;
+        z-index: 1;
+        transition-delay: 0s;
+    }
+    .container.show-forgot-password .form-box.forgot-password {
+        opacity: 1;
+        z-index: 2;
+        transition-delay: 0.6s;
+    }
+
+    /* Ensure other forms are hidden correctly */
+    .container.active .form-box.forgot-password,
+    .container.show-forgot-password .form-box.register {
+        opacity: 0;
+        z-index: 1;
+        transition-delay: 0s;
+    }
+
+
+    /* Toggle Box on small screens */
+    .toggle-box {
+        position: relative; /* Make it part of the normal flow */
+        width: 100%;
+        height: 30%; /* Take top 30% of container */
+        left: 0; /* Reset left position */
+        top: 0; /* Reset top position */
+        transform: translateY(0); /* Reset transform */
+        order: 1; /* Place it at the top */
+    }
+
+    .toggle-box::before {
+        left: 0; /* Reset left */
+        top: -100%; /* Position above to rotate down */
+        width: 100%; /* Take full width */
+        height: 200%; /* Double height for rotation */
+        border-radius: 0 0 30px 30px; /* Rounded bottom corners */
+        transform-origin: center top; /* Rotate from the top center */
+        transition: transform 1.2s ease-in-out;
+    }
+    /* When active (register) on small screens */
+    .container.active .toggle-box::before {
+        transform: translateY(50%); /* Slide down to show register panel */
+        border-radius: 30px 30px 0 0; /* Rounded top corners */
+    }
+    /* When show-forgot-password on small screens */
+    .container.show-forgot-password .toggle-box::before {
+        transform: translateY(50%); /* Slide down to show FP panel */
+        border-radius: 30px 30px 0 0; /* Rounded top corners */
+    }
+
+
+    .toggle-panel {
+        position: absolute;
+        top: 0;
+        left: 0; /* All panels start at left */
+        width: 100%;
+        height: 100%;
+        opacity: 0; /* Hidden by default, controlled by class */
+        transition: opacity 0.6s ease-in-out;
+        z-index: 1; /* Default z-index */
+    }
+
+    /* Initial (login) panel visibility */
+    .toggle-panel.toggle-left {
+        opacity: 1;
+        z-index: 2; /* Active panel on top */
+        transition-delay: 0.6s;
+    }
+    /* Hidden by default */
+    .toggle-panel.toggle-right,
+    .toggle-panel.toggle-forgot-password {
+        z-index: 1;
+    }
+
+    /* When active (register) panel visibility */
+    .container.active .toggle-panel.toggle-left {
+        opacity: 0;
+        transition-delay: 0s;
+    }
+    .container.active .toggle-panel.toggle-right {
+        opacity: 1;
+        z-index: 2;
+        transition-delay: 0.6s;
+    }
+    .container.active .toggle-panel.toggle-forgot-password {
+        opacity: 0;
+        transition-delay: 0s;
+    }
+
+    /* When show-forgot-password panel visibility */
+    .container.show-forgot-password .toggle-panel.toggle-left {
+        opacity: 0;
+        transition-delay: 0s;
+    }
+    .container.show-forgot-password .toggle-panel.toggle-right {
+        opacity: 0;
+        transition-delay: 0s;
+    }
+    .container.show-forgot-password .toggle-panel.toggle-forgot-password {
+        opacity: 1;
+        z-index: 2;
+        transition-delay: 0.6s;
+    }
+
+
+    .toggle-panel p {
+        margin-bottom: 20px;
+    }
+
+    .toggle-panel .btn {
+        width: 160px;
+        height: 46px;
+        background: transparent;
+        border: 2px solid #fff;
+        box-shadow: none;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    .toggle-panel .btn:hover {
+        background: #fff;
+        color: #7494ec;
+    }
+
+    @media screen and (max-width: 400px) {
+        .form-box {
+            padding: 15px;
+        }
+
+        .input-box input {
+            padding: 10px 40px 10px 15px;
+            font-size: 14px;
+        }
+
+        .input-box i {
+            right: 15px;
+            font-size: 18px;
+        }
+
+        .btn {
+            height: 42px;
+            font-size: 14px;
+        }
+
+        .social-icons a {
+            padding: 8px;
+            font-size: 20px;
+            margin: 0 5px;
+        }
+
+        .toggle-panel h1 {
+            font-size: 24px;
+        }
+
+        .toggle-panel p {
+            font-size: 12px;
+        }
+
+        .toggle-panel .btn {
+            width: 130px;
+            height: 40px;
+            font-size: 14px;
+        }
+    }

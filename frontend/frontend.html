@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Audio Separator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#home-section" class="nav-link active">Home</a></li>
+                    <li><a href="#about-section" class="nav-link">About</a></li>
+                    <li><a href="#contact-section" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-content">
+                <h1 id="main-title">Video Audio Separator</h1>
+                <p id="main-tagline">Effortlessly separate vocals and music from your video files.</p>
+            </div>
+            <div class="auth-buttons">
+                <button id="register-button" class="btn-register">Register / Login</button>
+            </div>
+        </header>
+
+        <br><br><br>
+
+        <main>
+           
+                <h2>Upload a video to separate vocals and music</h2>
+                <form id="upload-form">
+                    <div class="form-group file-input-wrapper">
+                        <input type="file" name="file" id="file-upload" accept="video/*" required>
+                        <label for="file-upload" class="custom-file-upload">
+                            <span id="file-name">Choose File...</span>
+                            <i class="fas fa-upload"></i>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="format-select">Select output format:</label>
+                        <select name="format" id="format-select">
+                            <option value="wav">WAV</option>
+                            <option value="mp4">MP4</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        Upload and Process 
+                        <span class="spinner" style="display: none;"></span>
+                    </button>
+                </form>
+                <section id="result" class="result-section" style="margin-top: 20px; display: none;"></section>
+            </section>
+
+            <br><br><br>
+
+          
+                <h2>About Our Separator</h2>
+                <p class="mission-statement">
+                    Our goal is to provide a seamless and efficient tool for creators, musicians, and enthusiasts to easily isolate
+                    vocal tracks and instrumentals from any video file. Whether you're making karaoke tracks, remixes, or simply
+                    analyzing audio, we've got you covered.
+                </p>
+
+                <h3>How It Works</h3>
+                <div class="about-cards-container">
+                    <div class="card">
+                        <i class="fas fa-video card-icon"></i>
+                        <h3>Upload Your Video</h3>
+                        <p>Simply upload your video file (MP4, AVI, MOV, etc.) directly to our platform.</p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-cogs card-icon"></i>
+                        <h3>AI-Powered Separation</h3>
+                        <p>Our advanced AI algorithms intelligently analyze your video and separate the vocal and instrumental components.</p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-file-audio card-icon"></i>
+                        <h3>Download Separated Tracks</h3>
+                        <p>Receive individual high-quality audio files for vocals and background music in your chosen format.</p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-music card-icon"></i>
+                        <h3>Perfect for Remixes</h3>
+                        <p>Create unique remixes, mashups, or karaoke versions with isolated tracks.</p>
+                    </div >
+                    <div class="card">
+                        <i class="fas fa-microphone-alt card-icon"></i>
+                        <h3>Vocal Practice</h3>
+                        <p>Remove vocals to practice singing along with your favorite songs' instrumentals.</p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-search-plus card-icon"></i>
+                        <h3>Audio Analysis</h3>
+                        <p>Analyze vocal patterns or instrumental arrangements more clearly for academic or professional purposes.</p>
+                    </div>
+                </div>
+            </section>
+
+            <br><br><br>
+
+            
+                <h2>Get in Touch</h2>
+                <div class="contact-info">
+                    <p><i class="fas fa-envelope"></i> Email: support@videosplit.com</p>
+                    <p><i class="fas fa-phone"></i> Phone: +91 98765 43210</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Address: 123 Separator St, Audio City, Bangalore, India</p>
+                </div>
+                <h3>Send us a message:</h3>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <label for="contact-name">Your Name:</label>
+                        <input type="text" id="contact-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email">Your Email:</label>
+                        <input type="email" id="contact-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message">Message:</label>
+                        <textarea id="contact-message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Send Message</button>
+                </form>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Video Audio Separator. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const REGISTER_LOGIN_PAGE_PATH = "login_reg.html"; // Relative path for deployment
+        const SESSION_STORAGE_KEY = "isLoggedIn"; // Key for session storage
+
+        // --- DOM Elements ---
+        const registerButton = document.getElementById('register-button');
+        const uploadForm = document.getElementById('upload-form');
+        const fileUploadInput = document.getElementById('file-upload');
+        const fileNameSpan = document.getElementById('file-name');
+        const resultDiv = document.getElementById("result");
+        const submitButton = document.querySelector(".btn-submit");
+        const spinner = document.querySelector(".spinner");
+
+        // Single-page navigation elements
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        const mainTitle = document.getElementById('main-title');
+        const mainTagline = document.getElementById('main-tagline');
+
+        // --- Functions ---
+        function redirectToRegisterLogin() {
+            window.location.href = REGISTER_LOGIN_PAGE_PATH;
+        }
+
+        function showSection(sectionId) {
+            contentSections.forEach(section => {
+                section.classList.remove('active-content');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) { // Added check to ensure target section exists
+                targetSection.classList.add('active-content');
+            }
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                // Correctly match the href to the section ID (e.g., #home-section)
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Update header content based on active section
+            if (sectionId === 'home-section') {
+                mainTitle.textContent = 'Video Audio Separator';
+                mainTagline.textContent = 'Effortlessly separate vocals and music from your video files.';
+            } else if (sectionId === 'about-section') {
+                mainTitle.textContent = 'About Our Separator';
+                mainTagline.textContent = 'Learn more about what our Video Audio Separator can do for you.';
+            } else if (sectionId === 'contact-section') {
+                mainTitle.textContent = 'Contact Us';
+                mainTagline.textContent = 'We\'d love to hear from you!';
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Register button click listener
+        registerButton.addEventListener('click', redirectToRegisterLogin);
+
+        // Update file name display
+        fileUploadInput.addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'Choose File...';
+            fileNameSpan.textContent = fileName;
+        });
+
+        // Form submission listener for Home section
+        uploadForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            if (sessionStorage.getItem(SESSION_STORAGE_KEY) !== "true") {
+                alert("Please register or log in to use the upload feature.");
+                redirectToRegisterLogin();
+                return;
+            }
+
+            if (!fileUploadInput.files.length) {
+                alert("Please select a video file before processing.");
+                return;
+            }
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            resultDiv.innerHTML = "";
+            resultDiv.classList.remove("error", "success");
+            resultDiv.innerHTML = `<p class="processing-message">Processing... Please wait.</p>`;
+            resultDiv.style.display = "block";
+            resultDiv.classList.add("show");
+
+            submitButton.disabled = true;
+            spinner.style.display = "inline-block";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/process", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to process file");
+                }
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="download-links">
+                        <h3>Download Your Files:</h3>
+                        <a href="http://127.0.0.1:8000${data.vocals_url}" target="_blank" class="download-btn">Download Vocals <i class="fas fa-file-audio"></i></a>
+                        <a href="http://127.0.0.1:8000${data.music_url}" target="_blank" class="download-btn">Download Music <i class="fas fa-music"></i></a>
+                    </div>
+                `;
+                resultDiv.classList.add("success");
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error-message"><span>❌</span> ${err.message}</p>`;
+                resultDiv.classList.add("error");
+            } finally {
+                submitButton.disabled = false;
+                spinner.style.display = "none";
+            }
+        });
+
+        // Navigation links event listeners
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent default anchor jump
+                // The href directly matches the section ID now, so no need for replace
+                const targetId = this.getAttribute('href').substring(1); 
+                showSection(targetId);
+            });
+        });
+
+        // Basic contact form submission (client-side only for this example)
+        const contactForm = document.querySelector('.contact-form');
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon!');
+            contactForm.reset();
+        });
+
+        // Initial section display based on hash in URL or default to home
+        window.addEventListener('DOMContentLoaded', () => {
+            const initialHash = window.location.hash.substring(1);
+            if (initialHash && document.getElementById(initialHash)) { // Check if element with hash ID exists
+                showSection(initialHash);
+            } else {
+                showSection('home-section');
+            }
+        });
+
+        // Handle browser back/forward buttons for hash changes
+        window.addEventListener('hashchange', () => {
+            const newHash = window.location.hash.substring(1);
+            if (newHash && document.getElementById(newHash)) {
+                showSection(newHash);
+            } else {
+                showSection('home-section');
+            }
+        });
+        function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
+            rect.bottom >= 0
+        );
+        }
+
+        function checkVisibleSections() {
+        document.querySelectorAll('.content-section').forEach(section => {
+            if (isElementInViewport(section)) {
+            section.classList.add('visible');
+            } else {
+            section.classList.remove('visible');
+            }
+        });
+        }
+
+        window.addEventListener('scroll', checkVisibleSections);
+        window.addEventListener('resize', checkVisibleSections);
+        window.addEventListener('load', checkVisibleSections);
+
+        // Also call on initial DOMContentLoaded to show visible sections on load
+        window.addEventListener('DOMContentLoaded', () => {
+        checkVisibleSections();
+        });
+
+    </script>
+</body>
+</html>
+
+

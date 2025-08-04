@@ -1,0 +1,510 @@
+/* ====== Base Reset & Typography ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: #f0f0f0;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ====== Container ====== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ====== Header and Nav ====== */
+header.scrolled {
+  background-color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+header {
+  text-align: center;
+  padding-bottom: 20px;
+  animation: fadeIn 1.2s ease forwards;
+  opacity: 0;
+}
+
+.main-nav {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: fadeIn 1.5s ease forwards;
+  opacity: 0;
+}
+
+.main-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+}
+
+.main-nav a {
+  color: #ccc;
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.main-nav a.active,
+.main-nav a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ====== Header Content ====== */
+.header-content {
+  margin: 20px 0;
+  animation: slideDownFadeIn 1.5s ease forwards;
+  opacity: 0;
+}
+
+#main-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  animation: floatText 6s ease-in-out infinite;
+}
+
+#main-tagline {
+  font-size: 1.2rem;
+  color: #ddd;
+  margin-top: 10px;
+  animation: fadeIn 2s ease forwards;
+  opacity: 0;
+}
+
+.auth-buttons {
+  margin-top: 20px;
+  animation: fadeIn 2.5s ease forwards;
+  opacity: 0;
+}
+
+.btn-register {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #0072ff, #00c6ff);
+  border: none;
+  border-radius: 25px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  will-change: transform;
+}
+
+.btn-register:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+/* ====== Sections ====== */
+.content-section {
+  display: none;
+  padding: 40px 0;
+  animation: fadeIn 0.6s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s, transform 0.6s;
+}
+
+.content-section.active-content {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ====== Home Section ====== */
+#upload-form {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  background: #1e2a36;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #00c6ff;
+}
+
+/* Custom File Upload */
+.file-input-wrapper {
+  position: relative;
+}
+
+input[type="file"] {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 50px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.custom-file-upload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #2a3a4e;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.custom-file-upload:hover {
+  background: #36566f;
+}
+
+.custom-file-upload i {
+  margin-left: 10px;
+  color: #00c6ff;
+}
+
+/* Buttons */
+.btn-submit {
+  background: linear-gradient(to right, #00b4db, #0083b0);
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s ease;
+  will-change: transform;
+}
+
+.btn-submit:hover {
+  background: linear-gradient(to right, #0083b0, #00b4db);
+  transform: scale(1.05);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid #00c6ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Result Box */
+.result-section {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #1e2a36;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+/* Download Buttons */
+.download-links {
+  text-align: center;
+}
+
+.download-btn {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  background: #00c6ff;
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.3s ease;
+  will-change: transform;
+}
+
+.download-btn:hover {
+  background: #009ecb;
+  transform: scale(1.1);
+}
+
+/* Error and Success */
+.success {
+  border-left: 6px solid #00ff7f;
+}
+
+.error {
+  border-left: 6px solid #ff4f4f;
+}
+
+.processing-message {
+  color: #ffc107;
+}
+
+/* ====== About Section ====== */
+.about-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.card {
+  background: #1c2c3b;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+  will-change: transform, opacity;
+  animation: popIn 0.7s forwards;
+  opacity: 0;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.3s; }
+.card:nth-child(3) { animation-delay: 0.5s; }
+.card:nth-child(4) { animation-delay: 0.7s; }
+.card:nth-child(5) { animation-delay: 0.9s; }
+.card:nth-child(6) { animation-delay: 1.1s; }
+
+.card:hover {
+  transform: translateY(-5px);
+  background: #233b50;
+}
+
+.card-icon {
+  font-size: 2rem;
+  color: #00c6ff;
+  margin-bottom: 10px;
+  transition: color 0.3s ease;
+}
+
+.card:hover .card-icon {
+  color: #00ffbf;
+}
+
+/* Add fade and slide animation to about section container */
+.about-cards-container,
+.mission-statement,
+h2, h3 {
+  animation: fadeIn 1.2s ease forwards;
+  opacity: 0;
+}
+
+/* ====== Contact Section ====== */
+.contact-info {
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 2;
+  animation: fadeIn 1.2s ease forwards;
+  opacity: 0;
+}
+
+.contact-info i {
+  margin-right: 8px;
+  color: #00c6ff;
+}
+
+.contact-form {
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeIn 1.5s ease forwards;
+  opacity: 0;
+}
+
+/* Animate Contact Section headings */
+#contact-section h2,
+#contact-section h3 {
+  animation: fadeIn 1.2s ease forwards;
+  opacity: 0;
+}
+
+/* ====== Footer ====== */
+footer {
+  text-align: center;
+  margin-top: 60px;
+  padding: 20px 0;
+  font-size: 0.9rem;
+  color: #aaa;
+  border-top: 1px solid #333;
+  animation: fadeIn 1.5s ease forwards;
+  opacity: 0;
+}
+
+/* ====== Animations ====== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDownFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatText {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ====== Responsive Tweaks ====== */
+@media (max-width: 768px) {
+  .main-nav ul {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  #main-title {
+    font-size: 2.2rem;
+  }
+}
+.content-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(.16,1,.32,1), transform 0.8s cubic-bezier(.16,1,.32,1);
+  will-change: opacity, transform;
+  pointer-events: none;
+  display: none;
+}
+
+.content-section.active-content {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.card {
+  opacity: 0;
+  transform: translateY(30px) scale(0.97);
+  transition: opacity 0.7s cubic-bezier(.16,1,.32,1), transform 0.7s cubic-bezier(.16,1,.32,1);
+}
+
+.content-section.active-content .card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.card:nth-child(1) { transition-delay: 0.1s; }
+.card:nth-child(2) { transition-delay: 0.25s; }
+.card:nth-child(3) { transition-delay: 0.4s; }
+.card:nth-child(4) { transition-delay: 0.55s; }
+.card:nth-child(5) { transition-delay: 0.7s; }
+.card:nth-child(6) { transition-delay: 0.85s; }
+
+.mission-statement,
+.contact-info,
+.contact-form,
+#about-section h2,
+#about-section h3,
+#contact-section h2,
+#contact-section h3 {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.8s cubic-bezier(.16,1,.32,1), transform 0.8s cubic-bezier(.16,1,.32,1);
+}
+
+.content-section.active-content .mission-statement,
+.content-section.active-content .contact-info,
+.content-section.active-content .contact-form,
+.content-section.active-content h2,
+.content-section.active-content h3 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Starting state for scroll animations */
+.content-section,
+.about-cards-container,
+.mission-statement,
+.contact-info,
+.contact-form,
+#about-section h2,
+#about-section h3,
+#contact-section h2,
+#contact-section h3,
+.card {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.8s cubic-bezier(.16,1,.32,1), transform 0.8s cubic-bezier(.16,1,.32,1);
+  will-change: opacity, transform;
+}
+
+/* Visible state when scrolled into view */
+.content-section.visible,
+.content-section.visible .mission-statement,
+.content-section.visible .about-cards-container,
+.content-section.visible .contact-info,
+.content-section.visible .contact-form,
+.content-section.visible h2,
+.content-section.visible h3,
+.content-section.visible .card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered card animations inside visible about section */
+.content-section.visible .card {
+  transition-delay: 0s; /* reset to 0 for immediate start */
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.content-section.visible .card:nth-child(1) { transition-delay: 0.1s; }
+.content-section.visible .card:nth-child(2) { transition-delay: 0.25s; }
+.content-section.visible .card:nth-child(3) { transition-delay: 0.4s; }
+.content-section.visible .card:nth-child(4) { transition-delay: 0.55s; }
+.content-section.visible .card:nth-child(5) { transition-delay: 0.7s; }
+.content-section.visible .card:nth-child(6) { transition-delay: 0.85s; }
