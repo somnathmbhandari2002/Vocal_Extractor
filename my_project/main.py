@@ -200,7 +200,8 @@ def download(file: str = Query(...)):
     return FileResponse(file, media_type="application/octet-stream", filename=os.path.basename(file))
 
 # ------------------- Entry Point for Deployment -------------------
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))  # use $PORT from environment if available
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+# if __name__ == "__main__":
+#     import uvicorn
+#     port = int(os.environ.get("PORT", 8000))  # use $PORT from environment if available
+#     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+
