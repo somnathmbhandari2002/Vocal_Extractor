@@ -1,10 +1,12 @@
 fastapi
 uvicorn[standard]
-python-multipart
 pydantic
+python-multipart
 requests
-soundfile
+email-validator
+numpy==1.26.4
 torch
 torchaudio
-demucs
-numpy==1.26.4
+soundfile
+ffmpeg-python
+demucs @ git+https://github.com/facebookresearch/demucs.git
