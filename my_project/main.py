@@ -84,7 +84,6 @@ def google_login(req: GoogleLoginRequest):
         )
         data = response.json()
         if "error" in data:
-            # Check for specific Google errors
             raise HTTPException(status_code=401, detail=f"Invalid Google token: {data.get('error_description', data.get('error'))}")
 
         email = data.get("email")
@@ -179,4 +178,9 @@ def download(file: str):
         
     return FileResponse(file, media_type="application/octet-stream", filename=os.path.basename(file))
 
-# 639870103559-p7mrkk5m47n9jd2jkfhu38lk3jnve4cc.apps.googleusercontent.com
+
+# ------------------- Entry Point for Deployment -------------------
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))  # use $PORT from environment if available
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
