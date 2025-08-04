@@ -50,6 +50,12 @@ class GoogleLoginRequest(BaseModel):
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
+# ------------------- Initial -------------------
+@app.get("/")
+def read_root():
+    return {"message": "Vocal Extractor API is running!"}
+
+
 # ------------------- Auth Routes -------------------
 @app.post("/register")
 def register(req: RegisterRequest):
@@ -184,3 +190,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))  # use $PORT from environment if available
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+
